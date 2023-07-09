@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/">
+        <file>pics/1.png</file>
+        <file>pics/2.png</file>
+        <file>pics/3.png</file>
+        <file>pics/4.png</file>
+        <file>pics/5.png</file>
+        <file>pics/6.bmp</file>
+        <file>pics/7.bmp</file>
+        <file>pics/8.bmp</file>
+        <file>pics/9.png</file>
+        <file>pics/10.png</file>
+        <file>pics/11.png</file>
+        <file>pics/start.png</file>
+        <file>11.jpg</file>
+        <file>22.jpg</file>
+        <file>33.jpg</file>
+        <file>mainwindow.ui</file>
+        <file>gamewindow.ui</file>
+    </qresource>
+</RCC>
