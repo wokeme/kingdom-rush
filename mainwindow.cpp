@@ -2,11 +2,11 @@
 #include "ui_mainwindow.h"
 #include <QPainter>
 #include "mybottom.h"
-#include "gamewindow.h"
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+MainWindow::MainWindow(QWidget *parent,gamewindow* game)
+    : QMainWindow(parent),game(game)
     , ui(new Ui::MainWindow)
 {
+//    std::cout<<"!!\n";
     ui->setupUi(this);
     this->setFixedSize(800,600);
     this->setWindowIcon(QPixmap(":/pics/9.png"));
@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
     Mybottom * startBtn = new Mybottom(":/pics/start.png");
     startBtn->setParent(this);
     startBtn->move(this->width()*0.5-startBtn->width()*0.5,this->height()*0.7);
-    gamewindow* game = new gamewindow();
+//    gamewindow* game = new gamewindow();
     connect(startBtn,&Mybottom::clicked,[=](){
         this->hide();
         game->show();

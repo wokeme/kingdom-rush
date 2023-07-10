@@ -8,6 +8,7 @@
 #include <QMessageBox>
 #include <QTextStream>
 #include <QtUiTools/QUiLoader>
+#include<QDebug>
 
 //#include <QUiLoader>
 gamewindow::gamewindow(QWidget *parent)
@@ -47,8 +48,9 @@ gamewindow::gamewindow(QWidget *parent)
     QPushButton *button = ui->findChild<QPushButton*>("pushButton");
     connect(button,&QPushButton::clicked,this,&on_pushButton_clicked);
     imageLabel = new QLabel(this);
+//    connect(button,&QPushButton::clicked,)
 }
-void gamewindow::paintEvent(QPaintEvent*)
+void gamewindow::paintEvent(QPaintEvent* p=nullptr,bool has=false)
 {
 //    std::cout<<"!!";
 //    QPainter painter(this);
@@ -61,19 +63,15 @@ void gamewindow::paintEvent(QPaintEvent*)
 //        painter.drawPixmap(260,290,70,50,C->Get_Path2());//绘制防御塔
 //    }
     //创建画家，指定绘图设备
-    if(C->Get_Tower()[0] == 0)
-    {
-        imageLabel->clear();
-        return;
-    }
 
     QPainter painter(this);
     QString path(":/pics/7.bmp"); //背景图片
     painter.drawPixmap(0,0,this->width(),this->height(),path);
+    std::cout<<"painter\n";
     //创建QPixmap对象
     QPixmap pix;
     //加载图片
-    pix.load(":/pics/4.png");
+    pix.load(":/pics/3.png");
     imageLabel->setStyleSheet("background-color: transparent;");
     // 调整 QLabel 大小以适应图片
     imageLabel->setFixedSize(pix.size());
@@ -83,17 +81,7 @@ void gamewindow::paintEvent(QPaintEvent*)
 
     // 显示图片
     imageLabel->setPixmap(pix);
-    imageLabel->show();
-    //绘制背景图
-//    painter.drawPixmap(220,117,pix.width(),pix.height(),pix);
-//    painter.drawPixmap(0,0,this->width(),this->height(),pix);
-
-    //加载标题
-//    pix.load(":/pics/9.png");
-    //缩放图片
-//    pix = pix.scaled(pix.width()*0.5,pix.height()*0.5);
-    //绘制标题
-//    painter.drawPixmap( this->height()/2,this->width()/6,pix.width(),pix.height(),pix);
+    if(has)imageLabel->show();
 }
 gamewindow::~gamewindow()
 {
@@ -103,16 +91,11 @@ gamewindow::~gamewindow()
 
 void gamewindow::on_pushButton_clicked()
 {
-
-    std::cout<<"chufa\n";
-    //触发按钮时，建立/拆除防御塔
-    if(C->Get_Tower()[0] == 1){
-        C->Set_Tower(0, 0);
-    }
-    else{
-        C->Set_Tower(0, 1);
-    }
-    this->update();
+    emit towerButtonClicked(220,50);
+}
+void gamewindow::on_build_tower(int x,int y)
+{
+    this->paintEvent(nullptr,true);
 }
 
 

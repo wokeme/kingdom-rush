@@ -15,16 +15,24 @@ CONFIG += c++17
 
 SOURCES += \
     common.cpp \
+    enemy.cpp \
     gamewindow.cpp \
     main.cpp \
     mainwindow.cpp \
-    mybottom.cpp
+    model.cpp \
+    mybottom.cpp \
+    tower.cpp \
+    viewmodel.cpp
 
 HEADERS += \
     common.h \
+    enemy.h \
     gamewindow.h \
     mainwindow.h \
-    mybottom.h
+    model.h \
+    mybottom.h \
+    tower.h \
+    viewmodel.h
 
 FORMS += \
     gamewindow.ui \

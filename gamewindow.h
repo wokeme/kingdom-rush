@@ -24,10 +24,14 @@ private:
     QLabel* imageLabel;
 
 protected:
-    void paintEvent(QPaintEvent*);
-private slots:
+    void paintEvent(QPaintEvent*,bool);
+public slots:
     void on_pushButton_clicked();
-//    void on_pushButton_clicked(bool checked);
+    void on_build_tower(int x,int y);
+    //    void on_pushButton_clicked(bool checked);
+signals:
+    void towerButtonClicked(int,int);
+    //其他与用户交互的信号
 
 };
 
