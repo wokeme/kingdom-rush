@@ -2,26 +2,21 @@
 #define VIEWMODEL_H
 #include"model.h"
 #include <QObject>
+#include "common.h"
 
-class viewmodel:public QObject
-{
+class viewmodel:public QObject{
     Q_OBJECT
 public:
-    viewmodel();
+    viewmodel(Model* m):M(m){};
     ~viewmodel(){};
 public slots:
-    void on_click_tower(int,int);
+    void UpdateTower(int,int,UpdateTowerType,TowerType=DEFAULTTYPE);
 signals:
-    void build_tower(int x,int y);
-    void update_tower(int,int,QString);
-    void kill_enemy();
-    void enemy_reach(int);
-    void game_over();
+    void ShowTower(int,int,QString);
+    void UpdateEnemy();//暂时未实现
 private:
     Model* M;
     //一些处理用户点击后的方法
-
-
 };
 
 #endif // VIEWMODEL_H

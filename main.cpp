@@ -3,15 +3,17 @@
 #include <QApplication>
 #include "gamewindow.h"
 #include "viewmodel.h"
+#include "model.h"
 
-int main(int argc, char *argv[])
-{
-    
+int main(int argc, char *argv[]){
     QApplication a(argc, argv);
+    Model* m=new Model();
     gamewindow* game=new gamewindow();
-    viewmodel* vm=new viewmodel();
-    QLabel::connect(game,&gamewindow::towerButtonClicked,vm,&viewmodel::on_click_tower);
-    QLabel::connect(vm,&viewmodel::build_tower,game,&gamewindow::on_build_tower);
+    viewmodel* vm=new viewmodel(m);
+    game->SetEnemys(m->GetEnemys());
+    game->SetTowers(m->GetTowers());
+    QLabel::connect(game,&gamewindow::UpdateTower,vm,&viewmodel::UpdateTower);
+    QLabel::connect(vm,&viewmodel::ShowTower,game,&gamewindow::ShowTower);
     MainWindow *w=new MainWindow(nullptr,game);
     w->show();
     return a.exec();

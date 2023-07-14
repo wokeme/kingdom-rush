@@ -19,6 +19,7 @@ SOURCES += \
     gamewindow.cpp \
     main.cpp \
     mainwindow.cpp \
+    map.cpp \
     model.cpp \
     mybottom.cpp \
     tower.cpp \
@@ -29,6 +30,7 @@ HEADERS += \
     enemy.h \
     gamewindow.h \
     mainwindow.h \
+    map.h \
     model.h \
     mybottom.h \
     tower.h \

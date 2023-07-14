@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QPainter>
 #include "mybottom.h"
+#include <QDebug>
 MainWindow::MainWindow(QWidget *parent,gamewindow* game)
     : QMainWindow(parent),game(game)
     , ui(new Ui::MainWindow)
@@ -11,11 +12,24 @@ MainWindow::MainWindow(QWidget *parent,gamewindow* game)
     this->setFixedSize(800,600);
     this->setWindowIcon(QPixmap(":/pics/9.png"));
     this->setWindowTitle("Kingdom rush");
-    Mybottom * startBtn = new Mybottom(":/pics/start.png");
-    startBtn->setParent(this);
-    startBtn->move(this->width()*0.5-startBtn->width()*0.5,this->height()*0.7);
+    QPushButton * startBtn = new QPushButton(this);
+
+    QPixmap buttonImage3(":/pics/start.png");
+    QIcon buttonIcon3(buttonImage3);
+    startBtn->setIcon(buttonIcon3);
+    startBtn->setIconSize(buttonImage3.size());
+    startBtn->setGeometry(this->width()*0.5-startBtn->width()*0.5,this->height()*0.7,buttonImage3.width(),buttonImage3.height());
+    qDebug()<<this->width()*0.5-startBtn->width()*0.5<<this->height()*0.7<<buttonImage3.width()<<buttonImage3.height();
+    startBtn->setStyleSheet("QPushButton {"
+                           "    border-image: url(:/pics/start.png);"
+                           "    background-color: transparent;"
+                           "    padding: 10px;"   // 根据需要调整间距
+                           "}");
+//    Mybottom * startBtn = new Mybottom(":/pics/start.png");
+//    startBtn->setParent(this);
+//    startBtn->move(this->width()*0.5-startBtn->width()*0.5,this->height()*0.7);
 //    gamewindow* game = new gamewindow();
-    connect(startBtn,&Mybottom::clicked,[=](){
+    connect(startBtn,&QPushButton::clicked,[=](){
         this->hide();
         game->show();
     });

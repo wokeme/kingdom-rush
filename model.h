@@ -1,10 +1,10 @@
 #ifndef MODEL_H
 #define MODEL_H
 #include<vector>
+#include<map>
 #include"enemy.h"
 #include"tower.h"
-class Model
-{
+class Model{
 public:
     Model();
     ~Model(){};
@@ -14,8 +14,10 @@ public:
     // 游戏状态更新的逻辑，例如检测敌人是否进入塔的射程范围
     // 遍历每个塔和敌人，进行攻击操作等
     void update();
+    std::map<std::pair<int,int>,Tower>* GetTowers(){return &towers;}
+    std::vector<Enemy>* GetEnemys(){return &enemys;}
 private:
-    std::vector<Tower> towers;
+    std::map<std::pair<int,int>,Tower> towers;
     std::vector<Enemy> enemys;
 };
 

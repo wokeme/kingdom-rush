@@ -2,18 +2,20 @@
 #include <QPainter>
 #include <QApplication>
 #include <QMainWindow>
-#include <QPushButton>
+
 #include <QVBoxLayout>
 #include <QFile>
 #include <QMessageBox>
 #include <QTextStream>
 #include <QtUiTools/QUiLoader>
-#include<QDebug>
+#include <QDebug>
 
 //#include <QUiLoader>
-gamewindow::gamewindow(QWidget *parent)
-{
+
+gamewindow::gamewindow(QWidget *parent){
+    QApplication::setStyle(QStyleFactory::create("Fusion"));  // 启用样式表功能
     C=new common();
+    setMouseTracking(true);
 
     // 加载游戏界面UI
     QFile file(":/gamewindow.ui");
@@ -21,16 +23,6 @@ gamewindow::gamewindow(QWidget *parent)
         QMessageBox::critical(this, "Error", "Failed to open game UI file.");
         return;
     }
-
-//    QTextStream stream(&file);
-//    QString uiContents = stream.readAll();
-
-
-//    // 创建游戏界面窗口并显示
-//    QMainWindow *gameWindow = new QMainWindow;
-//    QWidget *gameWidget = new QWidget(gameWindow);
-//    gameWindow->setCentralWidget(gameWidget);
-
     QUiLoader loader;
     QWidget *ui = loader.load(&file,this);
     file.close();
@@ -41,67 +33,210 @@ gamewindow::gamewindow(QWidget *parent)
 
     this->setLayout(new QVBoxLayout);
     this->layout()->addWidget(ui);
-    this->setFixedSize(400,300);
+    this->setFixedSize(800,600);
 //    //设置图标
     this->setWindowIcon(QPixmap(":/pics/9.png"));
     this->setWindowTitle("Kingdom rush");
-    QPushButton *button = ui->findChild<QPushButton*>("pushButton");
-    connect(button,&QPushButton::clicked,this,&on_pushButton_clicked);
+    QList<QObject*> children = ui->children();
+        foreach(QObject* obj, children){
+            // 判断对象是否为QPushButton类型
+            QPushButton* button = qobject_cast<QPushButton*>(obj);
+            if (button){
+                // 对找到的按钮进行操作
+                QPoint globalPos = button->mapToGlobal(QPoint(0, 0));
+                int x=globalPos.x();
+                int y=globalPos.y();
+                
+                int sizey=button->width();
+                int sizex=button->height();
+                buttons[std::make_pair(x+sizex/2,y+sizey/2)]=button;
+                connect(button,&QPushButton::clicked,[=]{
+                    emit pop_menu(x+sizex/2,y+sizey/2);
+                });
+                QPixmap pix;
+                pix.load(":/pics/locate.png");
+                QIcon temp(pix);
+                button->setIconSize(pix.size());
+                button->setGeometry(x-pix.height()/2,y-pix.width()/2,pix.width(),pix.height());
+                button->setStyleSheet("QPushButton {"
+                                          "    border-image: url(:/pics/locate.png);"
+                                           "    background-color: transparent;"
+                                          "    padding: 10px;"   // 根据需要调整间距
+                                          "}");
+            }
+        }
     imageLabel = new QLabel(this);
-//    connect(button,&QPushButton::clicked,)
 }
-void gamewindow::paintEvent(QPaintEvent* p=nullptr,bool has=false)
-{
-//    std::cout<<"!!";
-//    QPainter painter(this);
-//    QString path(":/pics/7.bmp"); //背景图片
-//    C->Set_Path1(path);
-//    path = ":/33.jpg"; //防御塔图片
-//    C->Set_Path2(path);
-//    painter.drawPixmap(0,0,this->width(),this->height(),C->Get_Path1());//绘制背景图
-//    if(C->Get_Tower()[0] != 0){ //防御塔是否建立？
-//        painter.drawPixmap(260,290,70,50,C->Get_Path2());//绘制防御塔
-//    }
-    //创建画家，指定绘图设备
-
+void gamewindow::paintEvent(int x,int y,QString tower_path,QPaintEvent* p=nullptr){
     QPainter painter(this);
     QString path(":/pics/7.bmp"); //背景图片
     painter.drawPixmap(0,0,this->width(),this->height(),path);
-    std::cout<<"painter\n";
     //创建QPixmap对象
     QPixmap pix;
-    //加载图片
-    pix.load(":/pics/3.png");
-    imageLabel->setStyleSheet("background-color: transparent;");
-    // 调整 QLabel 大小以适应图片
-    imageLabel->setFixedSize(pix.size());
-
-    // 设置 QLabel 的位置为按钮所在的位置
-    imageLabel->move(220,50);
-
-    // 显示图片
-    imageLabel->setPixmap(pix);
-    if(has)imageLabel->show();
+    pix.load(tower_path);
+    //创建QIcon对象
+    QIcon temp(pix);
+    //设置按钮图标
+    buttons[std::make_pair(x,y)]->setIcon(temp);
+    //设置按钮图标大小
+    buttons[std::make_pair(x,y)]->setIconSize(pix.size());
+    //设置按钮大小
+    buttons[std::make_pair(x,y)]->setGeometry(x-pix.height()/2,y-pix.width()/2,pix.width(),pix.height());
+    //设置按钮背景透明
+    buttons[std::make_pair(x,y)]->setStyleSheet("QPushButton {"
+                                          "    border-image: url(tower_path);"
+                                           "    background-color: transparent;"
+                                          "    padding: 10px;"   // 根据需要调整间距
+                                          "}");
 }
-gamewindow::~gamewindow()
-{
+gamewindow::~gamewindow(){
 //    delete ui;
 }
-
-
-void gamewindow::on_pushButton_clicked()
-{
-    emit towerButtonClicked(220,50);
+void gamewindow::ShowTower(int x,int y,QString path){
+    this->paintEvent(x,y,path,nullptr);
 }
-void gamewindow::on_build_tower(int x,int y)
-{
-    this->paintEvent(nullptr,true);
+void gamewindow::pop_menu(int x,int y){
+    qDebug()<<"pop_menu"<<x<<y;
+    UpdateTowerType utType;
+    TowerGrade tg;
+    if((*towers).find(std::make_pair(x,y))==(*towers).end()){
+        qDebug()<<"not find";
+        utType=UpdateTowerType::BUILD;
+    }
+    else{
+        qDebug()<<"find";
+        tg=(*towers)[std::make_pair(x,y)].GetGrade();
+        if(tg==TowerGrade::TERTIARY){
+            utType=UpdateTowerType::REMOVE;
+        }
+        else{
+            utType=UpdateTowerType::UPGRADATION;
+        }
+    }
+    if(utType==UpdateTowerType::UPGRADATION){
+        QPushButton *button1 = new QPushButton(this);
+        QPixmap buttonImage1(":/pics/upgrade.png");
+        QIcon buttonIcon1(buttonImage1);
+        button1->setIcon(buttonIcon1);
+        button1->setIconSize(buttonImage1.size());
+        button1->setGeometry(x-buttonImage1.width()/2-50, y-buttonImage1.height()/2-30,buttonImage1.width(),buttonImage1.height());
+        button1->setStyleSheet("QPushButton {"
+                              "    border-image: url(:/pics/upgrade.png);"
+                              "    background-color: transparent;"
+                              "    padding: 10px;"   // 根据需要调整间距
+                              "}");
+        connect(button1,&QPushButton::clicked,[=]{
+            emit push_menu(x,y,UPGRADATION,DEFAULTTYPE);
+        });
+        QPushButton *button2 = new QPushButton(this);
+        QPixmap buttonImage2(":/pics/sell.png");
+        QIcon buttonIcon2(buttonImage2);
+        button2->setIcon(buttonIcon2);
+        button2->setIconSize(buttonImage2.size());
+        button2->setGeometry(x-buttonImage2.width()/2+50, y-buttonImage2.height()/2-30,buttonImage2.width(),buttonImage2.height());
+        button2->setStyleSheet("QPushButton {"
+                              "    border-image: url(:/pics/sell.png);"
+                              "    background-color: transparent;"
+                              "    padding: 10px;"   // 根据需要调整间距
+                              "}");
+        connect(button2,&QPushButton::clicked,[=]{
+            emit push_menu(x,y,REMOVE,DEFAULTTYPE);
+        });
+        auto buttonClicked = [this, button1, button2]() {
+            delete button1;
+            delete button2;
+        };
+        // 连接其他按钮的点击信号到槽函数
+        connect(button1, &QPushButton::clicked, buttonClicked);
+        connect(button2, &QPushButton::clicked, buttonClicked);
+        button1->show();
+        button2->show();
+        return;
+    }
+    else if(utType==UpdateTowerType::REMOVE){
+        QPushButton *button1 = new QPushButton(this);
+        QPixmap buttonImage1(":/pics/sell.png");
+        QIcon buttonIcon1(buttonImage1);
+        button1->setIcon(buttonIcon1);
+        button1->setIconSize(buttonImage1.size());
+        button1->setGeometry(x-buttonImage1.width()/2-50, y-buttonImage1.height()/2-30,buttonImage1.width(),buttonImage1.height());
+        button1->setStyleSheet("QPushButton {"
+                              "    border-image: url(:/pics/sell.png);"
+                              "    background-color: transparent;"
+                              "    padding: 10px;"   // 根据需要调整间距
+                              "}");
+        connect(button1,&QPushButton::clicked,[=]{
+            emit push_menu(x,y,REMOVE,DEFAULTTYPE);
+        });
+        auto buttonClicked = [this, button1]() {
+            delete button1;
+        };
+        // 连接其他按钮的点击信号到槽函数
+        connect(button1, &QPushButton::clicked, buttonClicked);
+        button1->show();
+        return;
+    }
+    // Tower tower=(*towers)[std::make_pair(x,y)];
+    QPushButton *button1 = new QPushButton(this);
+    QPixmap buttonImage1(":/pics/1.png");
+    QIcon buttonIcon1(buttonImage1);
+    button1->setIcon(buttonIcon1);
+    button1->setIconSize(buttonImage1.size());
+    button1->setGeometry(x-buttonImage1.width()/2-50, y-buttonImage1.height()/2-30,buttonImage1.width(),buttonImage1.height());
+    button1->setStyleSheet("QPushButton {"
+                          "    border-image: url(:/pics/1.png);"
+                          "    background-color: transparent;"
+                          "    padding: 10px;"   // 根据需要调整间距
+                          "}");
+
+    QPushButton *button2 = new QPushButton(this);
+
+    QPixmap buttonImage2(":/pics/2.png");
+    QIcon buttonIcon2(buttonImage2);
+    button2->setIcon(buttonIcon2);
+    button2->setIconSize(buttonImage2.size());
+    button2->setGeometry(x-buttonImage1.width()/2, y-buttonImage1.height()/2-60,buttonImage2.width(),buttonImage2.height());
+    button2->setStyleSheet("QPushButton {"
+                           "    border-image: url(:/pics/2.png);"
+                           "    background-color: transparent;"
+                           "    padding: 10px;"   // 根据需要调整间距
+                           "}");
+    QPushButton *button3 = new QPushButton(this);
+
+    QPixmap buttonImage3(":/pics/11.png");
+    QIcon buttonIcon3(buttonImage3);
+    button3->setIcon(buttonIcon3);
+    button3->setIconSize(buttonImage3.size());
+    button3->setGeometry(x-buttonImage1.width()/2+50, y-buttonImage1.height()/2-30,buttonImage3.width(),buttonImage3.height());
+    button3->setStyleSheet("QPushButton {"
+                           "    border-image: url(:/pics/11.png);"
+                           "    background-color: transparent;"
+                           "    padding: 10px;"   // 根据需要调整间距
+                           "}");
+    button1->show();
+    button2->show();
+    button3->show();
+    connect(button1,&QPushButton::clicked,[=]{
+        emit push_menu(x,y,BUILD,TURRET);
+    });
+    connect(button2,&QPushButton::clicked,[=]{
+        emit push_menu(x,y,BUILD,MAGE);
+    });
+    connect(button3,&QPushButton::clicked,[=]{
+        emit push_menu(x,y,BUILD,ARCHER);
+    });
+    auto buttonClicked = [this, button1, button2, button3]() {
+        delete button1;
+        delete button2;
+        delete button3;
+    };
+    // 连接其他按钮的点击信号到槽函数
+    connect(button1, &QPushButton::clicked, buttonClicked);
+    connect(button2, &QPushButton::clicked, buttonClicked);
+    connect(button3, &QPushButton::clicked, buttonClicked);
 }
-
-
-//void gamewindow::on_pushButton_clicked(bool checked)
-//{
-
-//}
+void gamewindow::push_menu(int x,int y,UpdateTowerType type,TowerType towerType){
+    emit UpdateTower(x,y,type,towerType);
+}
 
 
