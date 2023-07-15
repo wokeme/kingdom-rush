@@ -24,5 +24,10 @@
         <file>pics/turret2.png</file>
         <file>pics/turret3.png</file>
         <file>pics/upgrade.png</file>
+        <file>pics/basicenemy.png</file>
+        <file>pics/fastenemy.png</file>
+        <file>pics/strongenemy.png</file>
+        <file>pics/archer3.png</file>
+        <file>pics/mage2.png</file>
     </qresource>
 </RCC>

@@ -1,9 +1,8 @@
 #ifndef MAP_H
 #define MAP_H
 #include <vector>
-typedef std::pair<int,int> position;
-class map
-{
+#define myposition std::pair<int,int>
+class map{
 public:
     map();
 

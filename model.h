@@ -1,9 +1,10 @@
 #ifndef MODEL_H
 #define MODEL_H
-#include<vector>
-#include<map>
-#include"enemy.h"
-#include"tower.h"
+#include <vector>
+#include <map>
+#include "enemy.h"
+#include "tower.h"
+#include "enemypath.h"
 class Model{
 public:
     Model();
@@ -16,9 +17,12 @@ public:
     void update();
     std::map<std::pair<int,int>,Tower>* GetTowers(){return &towers;}
     std::vector<Enemy>* GetEnemys(){return &enemys;}
+    EnemyPath* GetPath(){return &path;}
+    // void addPath(const EnemyPath& path){paths.push_back(path);}
 private:
     std::map<std::pair<int,int>,Tower> towers;
     std::vector<Enemy> enemys;
+    EnemyPath path;
 };
 
 #endif // MODEL_H

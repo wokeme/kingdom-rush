@@ -150,6 +150,19 @@
     <bool>true</bool>
    </property>
   </widget>
+  <widget class="QPushButton" name="start">
+   <property name="geometry">
+    <rect>
+     <x>750</x>
+     <y>200</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>start</string>
+   </property>
+  </widget>
  </widget>
  <resources>
   <include location="resourse.qrc"/>

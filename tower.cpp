@@ -10,3 +10,15 @@ void Tower::SetCoord(position p){
 void Tower::SetPath(QString s){
     this->path=s;
 }
+
+bool Tower::Upgrade(){
+    if(this->GetGrade() == PRIMARY){
+        SetGrade(SECONDARY);
+        return true;
+    }
+    if(this->GetGrade() == SECONDARY){
+        SetGrade(TERTIARY);
+        return true;
+    }
+    return false;
+}

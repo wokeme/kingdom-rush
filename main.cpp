@@ -12,8 +12,11 @@ int main(int argc, char *argv[]){
     viewmodel* vm=new viewmodel(m);
     game->SetEnemys(m->GetEnemys());
     game->SetTowers(m->GetTowers());
+    game->SetPaths(m->GetPath());
     QLabel::connect(game,&gamewindow::UpdateTower,vm,&viewmodel::UpdateTower);
     QLabel::connect(vm,&viewmodel::ShowTower,game,&gamewindow::ShowTower);
+    QLabel::connect(game,&gamewindow::UpdateEnemy,vm,&viewmodel::UpdateEnemy);
+    QLabel::connect(game,&gamewindow::MoveEnemy,vm,&viewmodel::MoveEnemy);
     MainWindow *w=new MainWindow(nullptr,game);
     w->show();
     return a.exec();

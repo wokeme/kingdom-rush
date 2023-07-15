@@ -2,7 +2,6 @@
 #include <QPainter>
 #include <QApplication>
 #include <QMainWindow>
-
 #include <QVBoxLayout>
 #include <QFile>
 #include <QMessageBox>
@@ -37,11 +36,18 @@ gamewindow::gamewindow(QWidget *parent){
 //    //设置图标
     this->setWindowIcon(QPixmap(":/pics/9.png"));
     this->setWindowTitle("Kingdom rush");
+//设置开始按钮
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(tick_1s()));
+    QPushButton* start=ui->findChild<QPushButton*>("start");
+    connect(start,&QPushButton::clicked,[=]{
+        timer->start(100);
+    });
     QList<QObject*> children = ui->children();
         foreach(QObject* obj, children){
             // 判断对象是否为QPushButton类型
             QPushButton* button = qobject_cast<QPushButton*>(obj);
-            if (button){
+            if (button&&button->objectName()!="start"){
                 // 对找到的按钮进行操作
                 QPoint globalPos = button->mapToGlobal(QPoint(0, 0));
                 int x=globalPos.x();
@@ -65,46 +71,60 @@ gamewindow::gamewindow(QWidget *parent){
                                           "}");
             }
         }
-    imageLabel = new QLabel(this);
+    //enemy_labels的初始化
 }
-void gamewindow::paintEvent(int x,int y,QString tower_path,QPaintEvent* p=nullptr){
-    QPainter painter(this);
-    QString path(":/pics/7.bmp"); //背景图片
-    painter.drawPixmap(0,0,this->width(),this->height(),path);
-    //创建QPixmap对象
-    QPixmap pix;
-    pix.load(tower_path);
-    //创建QIcon对象
-    QIcon temp(pix);
-    //设置按钮图标
-    buttons[std::make_pair(x,y)]->setIcon(temp);
-    //设置按钮图标大小
-    buttons[std::make_pair(x,y)]->setIconSize(pix.size());
-    //设置按钮大小
-    buttons[std::make_pair(x,y)]->setGeometry(x-pix.height()/2,y-pix.width()/2,pix.width(),pix.height());
-    //设置按钮背景透明
-    buttons[std::make_pair(x,y)]->setStyleSheet("QPushButton {"
-                                          "    border-image: url(tower_path);"
-                                           "    background-color: transparent;"
-                                          "    padding: 10px;"   // 根据需要调整间距
-                                          "}");
+void gamewindow::paintEvent(int x,int y,QString tower_path,QPaintEvent* p=nullptr,bool push=false){
+    if(push){
+        QPainter painter(this);
+        QString path(":/pics/7.bmp"); //背景图片
+        painter.drawPixmap(0,0,this->width(),this->height(),path);
+        //创建QPixmap对象
+        QPixmap pix;
+        pix.load(tower_path);
+        //创建QIcon对象
+        QIcon temp(pix);
+        //设置按钮图标
+        buttons[std::make_pair(x,y)]->setIcon(temp);
+        //设置按钮图标大小
+        buttons[std::make_pair(x,y)]->setIconSize(pix.size());
+        //设置按钮大小
+        buttons[std::make_pair(x,y)]->setGeometry(x-pix.height()/2,y-pix.width()/2,pix.width(),pix.height());
+        //设置按钮背景透明
+        buttons[std::make_pair(x,y)]->setStyleSheet("QPushButton {"
+                                            "    border-image: url(tower_path);"
+                                            "    background-color: transparent;"
+                                            "    padding: 10px;"   // 根据需要调整间距
+                                            "}");
+    }
+    for(auto it=(*enemys).begin();it!=(*enemys).end();it++){
+        if(it->check_status()){
+            QPixmap pix2;
+            pix2.load(it->get_path());  
+            if(enemy_labels.find(&(*it))==enemy_labels.end()){
+                enemy_labels[&(*it)]=new QLabel(this);
+            }
+            QLabel *temp=enemy_labels[&(*it)];
+            temp->setStyleSheet("background-color: transparent;");
+            temp->setFixedSize(pix2.size());
+            temp->move(it->Get_current_position().x(),it->Get_current_position().y());
+            temp->setPixmap(pix2);
+            temp->show();
+        }
+    }
 }
 gamewindow::~gamewindow(){
 //    delete ui;
 }
 void gamewindow::ShowTower(int x,int y,QString path){
-    this->paintEvent(x,y,path,nullptr);
+    this->paintEvent(x,y,path,nullptr,true);
 }
 void gamewindow::pop_menu(int x,int y){
-    qDebug()<<"pop_menu"<<x<<y;
     UpdateTowerType utType;
     TowerGrade tg;
     if((*towers).find(std::make_pair(x,y))==(*towers).end()){
-        qDebug()<<"not find";
         utType=UpdateTowerType::BUILD;
     }
     else{
-        qDebug()<<"find";
         tg=(*towers)[std::make_pair(x,y)].GetGrade();
         if(tg==TowerGrade::TERTIARY){
             utType=UpdateTowerType::REMOVE;
@@ -238,5 +258,10 @@ void gamewindow::pop_menu(int x,int y){
 void gamewindow::push_menu(int x,int y,UpdateTowerType type,TowerType towerType){
     emit UpdateTower(x,y,type,towerType);
 }
-
+void gamewindow::tick_1s(){
+    if(!this->enemys->empty()){
+        emit MoveEnemy();
+        this->paintEvent(0,0,"",nullptr);
+    }
+}
 

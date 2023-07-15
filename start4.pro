@@ -16,6 +16,7 @@ CONFIG += c++17
 SOURCES += \
     common.cpp \
     enemy.cpp \
+    enemypath.cpp \
     gamewindow.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -28,6 +29,7 @@ SOURCES += \
 HEADERS += \
     common.h \
     enemy.h \
+    enemypath.h \
     gamewindow.h \
     mainwindow.h \
     map.h \

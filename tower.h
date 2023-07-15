@@ -18,6 +18,7 @@ public:
     void SetType(TowerType t){type=t;}
     void SetGrade(TowerGrade g){grade=g;}
     TowerGrade GetGrade(){return grade;}
+    bool Upgrade();
 protected:
     TowerType type;
     QString path;
