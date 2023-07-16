@@ -6,11 +6,9 @@ Enemy::Enemy(){
 }
 
 bool Enemy::move(){
-    qDebug() << "Enemy::move()";
     if(this->check_status() == false){
         return false;
     }
-    qDebug() << "Enemy::move() 2";
     double movement = speed;
 
     while(movement > 0){

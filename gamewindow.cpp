@@ -12,6 +12,7 @@
 //#include <QUiLoader>
 
 gamewindow::gamewindow(QWidget *parent){
+    pop=false;
     QApplication::setStyle(QStyleFactory::create("Fusion"));  // 启用样式表功能
     C=new common();
     setMouseTracking(true);
@@ -38,11 +39,26 @@ gamewindow::gamewindow(QWidget *parent){
     this->setWindowTitle("Kingdom rush");
 //设置开始按钮
     QTimer *timer = new QTimer(this);
+    QTimer *timer2 = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(tick_1s()));
+    connect(timer2, SIGNAL(timeout()), this, SLOT(tick_100ms()));
     QPushButton* start=ui->findChild<QPushButton*>("start");
     connect(start,&QPushButton::clicked,[=]{
-        timer->start(100);
+        timer->start(55);
+        timer2->start(10);
+        start->hide();
     });
+    start=ui->findChild<QPushButton*>("start");
+    start->setStyleSheet("QPushButton {"
+                              "    border-image: url(:/pics/come.png);"
+                               "    background-color: transparent;"
+                              "    padding: 10px;"   // 根据需要调整间距
+                              "}");
+
+    // connect(start,&QPushButton::clicked,[=]{
+    //     timer->start(100);
+        
+    // });
     QList<QObject*> children = ui->children();
         foreach(QObject* obj, children){
             // 判断对象是否为QPushButton类型
@@ -72,6 +88,10 @@ gamewindow::gamewindow(QWidget *parent){
             }
         }
     //enemy_labels的初始化
+    heart_label=new QLabel(this);
+    money_label=new QLabel(this);
+    heart_num=new QLabel(this);
+    money_num=new QLabel(this);
 }
 void gamewindow::paintEvent(int x,int y,QString tower_path,QPaintEvent* p=nullptr,bool push=false){
     if(push){
@@ -96,21 +116,87 @@ void gamewindow::paintEvent(int x,int y,QString tower_path,QPaintEvent* p=nullpt
                                             "    padding: 10px;"   // 根据需要调整间距
                                             "}");
     }
+    for(auto it =labelsofenemy.begin();it!=labelsofenemy.end();it++){
+        (*it)->hide();
+    }
     for(auto it=(*enemys).begin();it!=(*enemys).end();it++){
         if(it->check_status()){
             QPixmap pix2;
-            pix2.load(it->get_path());  
-            if(enemy_labels.find(&(*it))==enemy_labels.end()){
-                enemy_labels[&(*it)]=new QLabel(this);
+            pix2.load(it->get_path()); 
+            // for(auto it=labelsofenemy.begin();it!=labelsofenemy.end();it++){
+            //     if(enemy_labels.find(&(*it))==enemy_labels.end()){
+            //         // enemy_labels[&(*it)]=new QLabel(this);
+            //         // labelsofenemy.push_back(enemy_labels[&(*it)]);
+            //     }
+            // } 
+            auto iter = std::find_if(enemy_labels.begin(), enemy_labels.end(), [it](const auto& pair) {
+                return pair.first == &(*it);
+            });
+            if(iter==enemy_labels.end()){
+                enemy_labels.push_back(std::make_pair(&(*it),new QLabel(this)));
+                iter=enemy_labels.end()-1;
+                labelsofenemy.push_back(enemy_labels.back().second);
             }
-            QLabel *temp=enemy_labels[&(*it)];
+            // if(enemy_labels.find(&(*it))==enemy_labels.end()){
+            //     enemy_labels[&(*it)]=new QLabel(this);
+            //     labelsofenemy.push_back(enemy_labels[&(*it)]);
+            // }
+            QLabel *temp=iter->second;
             temp->setStyleSheet("background-color: transparent;");
             temp->setFixedSize(pix2.size());
-            temp->move(it->Get_current_position().x(),it->Get_current_position().y());
+            temp->move(it->Get_current_position().x() - pix2.width()/2,it->Get_current_position().y() - pix2.height()/2);
             temp->setPixmap(pix2);
             temp->show();
         }
     }
+    // if(bullet->empty())return;
+    for(auto it=labelsofbullet.begin();it!=labelsofbullet.end();it++){
+        (*it)->hide();
+    }
+    for(auto it=(*bullet).begin();it!=(*bullet).end();it++){
+        QPixmap pix3;
+        pix3.load(it->get_path());
+
+        auto iter = std::find_if(bullet_labels.begin(), bullet_labels.end(), [it](const auto& pair) {
+            return pair.first == &(*it);
+        });
+        if(iter==bullet_labels.end()){
+            bullet_labels.push_back(std::make_pair(&(*it),new QLabel(this)));
+            iter=bullet_labels.end()-1;
+            labelsofbullet.push_back(bullet_labels.back().second);
+        }
+
+        // if(bullet_labels.find(&(*it))==bullet_labels.end()){
+        //     bullet_labels[&(*it)]=new QLabel(this);
+        //     labelsofbullet.push_back(bullet_labels[&(*it)]);
+        // }
+        QLabel *temp=iter->second;
+        temp->setStyleSheet("background-color: transparent;");
+        temp->setFixedSize(pix3.size());
+        temp->move(it->getPosition().first,it->getPosition().second);
+        temp->setPixmap(pix3);
+        temp->show();
+    }
+    heart_label->setStyleSheet("background-color: transparent;");
+    heart_label->setFixedSize(QPixmap(":/pics/heart.png").size());
+    heart_label->move(0,0);
+    heart_label->setPixmap(QPixmap(":/pics/heart.png"));
+    heart_label->show();
+    int h_num=*heart;
+    heart_num->setText(QString::number(h_num));
+    heart_num->setStyleSheet("background-color: transparent;");
+    heart_num->setFixedSize(QPixmap(":/pics/heart.png").size());
+    heart_num->move(heart_label->width()+5,0);
+    money_label->setStyleSheet("background-color: transparent;");
+    money_label->setFixedSize(QPixmap(":/pics/money.png").size());
+    money_label->move(0,heart_label->height()+5);
+    money_label->setPixmap(QPixmap(":/pics/money.png"));
+    money_label->show();
+    int m_num=*money;
+    money_num->setText(QString::number(m_num));
+    money_num->setStyleSheet("background-color: transparent;");
+    money_num->setFixedSize(QPixmap(":/pics/money.png").size());
+    money_num->move(money_label->width()+5,heart_label->height()+5);
 }
 gamewindow::~gamewindow(){
 //    delete ui;
@@ -119,6 +205,7 @@ void gamewindow::ShowTower(int x,int y,QString path){
     this->paintEvent(x,y,path,nullptr,true);
 }
 void gamewindow::pop_menu(int x,int y){
+    pop=true;
     UpdateTowerType utType;
     TowerGrade tg;
     if((*towers).find(std::make_pair(x,y))==(*towers).end()){
@@ -163,10 +250,16 @@ void gamewindow::pop_menu(int x,int y){
             emit push_menu(x,y,REMOVE,DEFAULTTYPE);
         });
         auto buttonClicked = [this, button1, button2]() {
-            delete button1;
-            delete button2;
+            if(button1!=nullptr)delete button1;
+            if(button2!=nullptr)delete button2;
         };
+        // auto somewhere_clicked2 = [this,button1, button2]() {
+        //     qDebug()<<"somewhere_clicked2";
+        //     if(button1!=nullptr)button1->hide();
+        //     if(button2!=nullptr)button2->hide();
+        // };
         // 连接其他按钮的点击信号到槽函数
+        // connect(this,&gamewindow::click_somewhere, somewhere_clicked2);       
         connect(button1, &QPushButton::clicked, buttonClicked);
         connect(button2, &QPushButton::clicked, buttonClicked);
         button1->show();
@@ -189,73 +282,88 @@ void gamewindow::pop_menu(int x,int y){
             emit push_menu(x,y,REMOVE,DEFAULTTYPE);
         });
         auto buttonClicked = [this, button1]() {
-            delete button1;
+            if(button1!=nullptr)delete button1;
         };
+        // auto somewhere_clicked1 = [this, button1]() {
+        //     if(button1!=nullptr)button1->hide();
+        // };
         // 连接其他按钮的点击信号到槽函数
+        // connect(this,&gamewindow::click_somewhere, somewhere_clicked1);  
         connect(button1, &QPushButton::clicked, buttonClicked);
         button1->show();
         return;
     }
     // Tower tower=(*towers)[std::make_pair(x,y)];
-    QPushButton *button1 = new QPushButton(this);
-    QPixmap buttonImage1(":/pics/1.png");
-    QIcon buttonIcon1(buttonImage1);
-    button1->setIcon(buttonIcon1);
-    button1->setIconSize(buttonImage1.size());
-    button1->setGeometry(x-buttonImage1.width()/2-50, y-buttonImage1.height()/2-30,buttonImage1.width(),buttonImage1.height());
-    button1->setStyleSheet("QPushButton {"
-                          "    border-image: url(:/pics/1.png);"
-                          "    background-color: transparent;"
-                          "    padding: 10px;"   // 根据需要调整间距
-                          "}");
+    else{
+        QPushButton *button1 = new QPushButton(this);
+        QPixmap buttonImage1(":/pics/1.png");
+        QIcon buttonIcon1(buttonImage1);
+        button1->setIcon(buttonIcon1);
+        button1->setIconSize(buttonImage1.size());
+        button1->setGeometry(x-buttonImage1.width()/2-50, y-buttonImage1.height()/2-30,buttonImage1.width(),buttonImage1.height());
+        button1->setStyleSheet("QPushButton {"
+                            "    border-image: url(:/pics/1.png);"
+                            "    background-color: transparent;"
+                            "    padding: 10px;"   // 根据需要调整间距
+                            "}");
 
-    QPushButton *button2 = new QPushButton(this);
+        QPushButton *button2 = new QPushButton(this);
 
-    QPixmap buttonImage2(":/pics/2.png");
-    QIcon buttonIcon2(buttonImage2);
-    button2->setIcon(buttonIcon2);
-    button2->setIconSize(buttonImage2.size());
-    button2->setGeometry(x-buttonImage1.width()/2, y-buttonImage1.height()/2-60,buttonImage2.width(),buttonImage2.height());
-    button2->setStyleSheet("QPushButton {"
-                           "    border-image: url(:/pics/2.png);"
-                           "    background-color: transparent;"
-                           "    padding: 10px;"   // 根据需要调整间距
-                           "}");
-    QPushButton *button3 = new QPushButton(this);
+        QPixmap buttonImage2(":/pics/2.png");
+        QIcon buttonIcon2(buttonImage2);
+        button2->setIcon(buttonIcon2);
+        button2->setIconSize(buttonImage2.size());
+        button2->setGeometry(x-buttonImage1.width()/2, y-buttonImage1.height()/2-60,buttonImage2.width(),buttonImage2.height());
+        button2->setStyleSheet("QPushButton {"
+                            "    border-image: url(:/pics/2.png);"
+                            "    background-color: transparent;"
+                            "    padding: 10px;"   // 根据需要调整间距
+                            "}");
+        QPushButton *button3 = new QPushButton(this);
 
-    QPixmap buttonImage3(":/pics/11.png");
-    QIcon buttonIcon3(buttonImage3);
-    button3->setIcon(buttonIcon3);
-    button3->setIconSize(buttonImage3.size());
-    button3->setGeometry(x-buttonImage1.width()/2+50, y-buttonImage1.height()/2-30,buttonImage3.width(),buttonImage3.height());
-    button3->setStyleSheet("QPushButton {"
-                           "    border-image: url(:/pics/11.png);"
-                           "    background-color: transparent;"
-                           "    padding: 10px;"   // 根据需要调整间距
-                           "}");
-    button1->show();
-    button2->show();
-    button3->show();
-    connect(button1,&QPushButton::clicked,[=]{
-        emit push_menu(x,y,BUILD,TURRET);
-    });
-    connect(button2,&QPushButton::clicked,[=]{
-        emit push_menu(x,y,BUILD,MAGE);
-    });
-    connect(button3,&QPushButton::clicked,[=]{
-        emit push_menu(x,y,BUILD,ARCHER);
-    });
-    auto buttonClicked = [this, button1, button2, button3]() {
-        delete button1;
-        delete button2;
-        delete button3;
-    };
-    // 连接其他按钮的点击信号到槽函数
-    connect(button1, &QPushButton::clicked, buttonClicked);
-    connect(button2, &QPushButton::clicked, buttonClicked);
-    connect(button3, &QPushButton::clicked, buttonClicked);
+        QPixmap buttonImage3(":/pics/11.png");
+        QIcon buttonIcon3(buttonImage3);
+        button3->setIcon(buttonIcon3);
+        button3->setIconSize(buttonImage3.size());
+        button3->setGeometry(x-buttonImage1.width()/2+50, y-buttonImage1.height()/2-30,buttonImage3.width(),buttonImage3.height());
+        button3->setStyleSheet("QPushButton {"
+                            "    border-image: url(:/pics/11.png);"
+                            "    background-color: transparent;"
+                            "    padding: 10px;"   // 根据需要调整间距
+                            "}");
+        button1->show();
+        button2->show();
+        button3->show();
+        connect(button1,&QPushButton::clicked,[=]{
+            emit push_menu(x,y,BUILD,TURRET);
+        });
+        connect(button2,&QPushButton::clicked,[=]{
+            emit push_menu(x,y,BUILD,MAGE);
+        });
+        connect(button3,&QPushButton::clicked,[=]{
+            emit push_menu(x,y,BUILD,ARCHER);
+        });
+        auto buttonClicked = [this, button1, button2, button3]() {
+            if(button1!=nullptr)delete button1;
+            if(button2!=nullptr)delete button2;
+            if(button3!=nullptr)delete button3;
+        };
+        // auto somewhere_clicked = [this, button1, button2, button3]() {
+        //     if(button1!=nullptr)button1->hide();
+        //     if(button2!=nullptr)button2->hide();
+        //     if(button3!=nullptr)button3->hide();
+        //     disconnect(this,&gamewindow::click_somewhere,0,0);
+        // };
+        // 连接其他按钮的点击信号到槽函数
+        connect(button1, &QPushButton::clicked, buttonClicked);
+        connect(button2, &QPushButton::clicked, buttonClicked);
+        connect(button3, &QPushButton::clicked, buttonClicked);
+        // connect(this,&gamewindow::click_somewhere, somewhere_clicked);   
+    }
+
 }
 void gamewindow::push_menu(int x,int y,UpdateTowerType type,TowerType towerType){
+    pop=false;
     emit UpdateTower(x,y,type,towerType);
 }
 void gamewindow::tick_1s(){
@@ -264,4 +372,17 @@ void gamewindow::tick_1s(){
         this->paintEvent(0,0,"",nullptr);
     }
 }
+void gamewindow::tick_100ms(){
+    emit MoveBullet();
+    if(!this->bullet->empty()){
+        this->paintEvent(0,0,"",nullptr);
+    }
+}
+// void gamewindow::mousePressEvent(QMouseEvent* event)
+// {
+//     if (event->button() == Qt::LeftButton&&pop) {
+//         // 鼠标左键按下，执行您的逻辑
+//         emit click_somewhere();
+//     }
+// }
 

@@ -48,7 +48,7 @@
     <string/>
    </property>
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -155,12 +155,12 @@
     <rect>
      <x>750</x>
      <y>200</y>
-     <width>21</width>
+     <width>31</width>
      <height>21</height>
     </rect>
    </property>
    <property name="text">
-    <string>start</string>
+    <string/>
    </property>
   </widget>
  </widget>

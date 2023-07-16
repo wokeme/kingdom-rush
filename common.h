@@ -31,8 +31,14 @@ typedef struct EnemyProperties{
     double max_hp;
     int damage;
     QString path;
+    int award;
 }EnemyProperties;
-
+typedef struct TowerProperties{
+    double range;
+    int damage;
+    int cost;
+    QString path;
+}TowerProperties;
 class common{
 public:
     common();
@@ -46,16 +52,7 @@ private:
     EnemyPath path;
     // QTimer *timer;
 };
-//std::map<EnemyType,common::EnemyProperties> common::EnemyPropertiesMap0 = {
-//    {NORMAL,{1,100,100,2,":/pics/basicenemy.png"}},
-//    {FAST,{2,50,50,1,":/pics/fastenemy.png"}},
-//    {STRONG,{0.5,200,200,4,":/pics/strongenemy.png"}}
-//};
-//std::vector<std::pair<EnemyType,int>> common::EnemyWave0 = {
-//    {NORMAL,10},
-//    {FAST,10},
-//    {STRONG,10}
-//};
+
 
 #endif // COMMON_H
 

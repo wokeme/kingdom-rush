@@ -29,5 +29,11 @@
         <file>pics/strongenemy.png</file>
         <file>pics/archer3.png</file>
         <file>pics/mage2.png</file>
+        <file>pics/heart.png</file>
+        <file>pics/money.png</file>
+        <file>pics/come.png</file>
+        <file>pics/archer_bullet.png</file>
+        <file>pics/mage_bullet.png</file>
+        <file>pics/turret_bullet.png</file>
     </qresource>
 </RCC>

@@ -14,9 +14,11 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    bullet.cpp \
     common.cpp \
     enemy.cpp \
     enemypath.cpp \
+    gameover.cpp \
     gamewindow.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -27,9 +29,11 @@ SOURCES += \
     viewmodel.cpp
 
 HEADERS += \
+    bullet.h \
     common.h \
     enemy.h \
     enemypath.h \
+    gameover.h \
     gamewindow.h \
     mainwindow.h \
     map.h \

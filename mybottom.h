@@ -2,8 +2,7 @@
 #define MYBOTTOM_H
 
 #include<QPushButton>
-class Mybottom : public QPushButton
-{
+class Mybottom : public QPushButton{
     Q_OBJECT
 public:
     explicit Mybottom(QWidget *parent = nullptr){setParent(parent);}

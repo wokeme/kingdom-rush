@@ -33,6 +33,12 @@ public:
     int get_delay(){
         return this->delay;
     }
+    void set_award(int _award){
+        this->award = _award;
+    }
+    int get_award(){
+        return award;
+    }
 protected:
     bool alive;
     bool dead;//一旦死亡，alive就无法再变为true
@@ -44,14 +50,6 @@ protected:
     QPoint current_position;
     Route *current_route;
     int delay;//延迟，用于实现敌人的延迟出现
+    int award;//击杀奖励
 };
-// class BasicEnemy: public Enemy{
-// public:
-//     BasicEnemy();
-// private:
-//     const double max_hp = 100;
-//     const int damage = 2;
-//     const QString path = ":/pics/basicenemy.png";
-// };
-
 #endif // ENEMY_H
